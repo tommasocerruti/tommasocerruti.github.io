@@ -8,7 +8,7 @@
       name="description"
       content="Tommaso Cerruti is an MSc student in Machine Intelligence at ETH Zurich focused on AI evaluation, monitoring, and alignment."
     />
-    <link rel="icon" type="image/avif" href="logos/desert-logo.png" />
+    <link rel="icon" type="image/png" href="logos/desert-logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -63,18 +63,41 @@
               </p>
 
               <p class="text">
-                I am interested in the evaluation, monitoring, and alignment of
-                autonomous AI agents, especially in reasoning-heavy settings. In
-                particular, I am interested in how we can distinguish genuine
-                alignment from behavior that only appears aligned during evaluation.
+                I am interested in the safety, alignment, and evaluation of
+                autonomous AI agents. In particular, I am interested in three
+                questions:
+              </p>
+
+              <ol class="text interests-list">
+                <li>
+                  How can we distinguish agents that are robustly aligned from agents that only
+                  appear aligned in the controlled environment of an evaluation?
+                </li>
+                <li>
+                  What new attack surfaces emerge once agents have tools, memory, and
+                  long-running state, and how can we diagnose and mitigate attacks such as
+                  memory poisoning?
+                </li>
+                <li>
+                  How can malicious or compromised agents manipulate the plans, beliefs, or
+                  objectives of benign agents in multi-agent settings?
+                </li>
+              </ol>
+
+              <p class="text">
                 I have also served as a reviewer for the ICML workshops
+                <a
+                  href="https://agentwild-workshop.github.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >"Agents in the Wild: Safety, Security, and Beyond"</a
+                >,
                 <a
                   href="https://compositional-learning.github.io/"
                   target="_blank"
                   rel="noopener noreferrer"
                   >"Compositional Learning: Safety, Interpretability, and Agents"</a
-                >
-                and
+                >, and
                 <a
                   href="https://trustworthy-ai-for-good.github.io/"
                   target="_blank"
@@ -85,10 +108,11 @@
 
               <p class="text">
                 Outside of research, I enjoy sports (rowing, muay thai, weight
-                lifting, hiking) and travelling (the picture on the right was taken
-                in the Sahara Desert, in Morocco).
+                lifting, and hiking), travelling (the picture on the right was taken in the Sahara
+                Desert, in Morocco), and trying new foods (although nothing
+                beats a carbonara with Coca-Cola).
               </p>
-              <p class="text last-updated">(Last updated: April 2026)</p>
+              <p class="text last-updated">(Last updated: May 2026)</p>
             </div>
           </section>
 
@@ -186,6 +210,22 @@
           const dialog = document.getElementById(trigger.dataset.dialogOpen);
           if (dialog) dialog.showModal();
         });
+      });
+
+      document.querySelectorAll(".photo-carousel").forEach((carousel) => {
+        const slides = Array.from(carousel.querySelectorAll("[data-photo-slide]"));
+        let activeIndex = Math.max(
+          0,
+          slides.findIndex((slide) => slide.classList.contains("is-active"))
+        );
+
+        if (slides.length < 2) return;
+
+        window.setInterval(() => {
+          slides[activeIndex].classList.remove("is-active");
+          activeIndex = (activeIndex + 1) % slides.length;
+          slides[activeIndex].classList.add("is-active");
+        }, 10000);
       });
     </script>
   </body>
