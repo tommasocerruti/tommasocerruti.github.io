@@ -6,227 +6,253 @@
     <title>Tommaso Cerruti</title>
     <meta
       name="description"
-      content="Tommaso Cerruti is an MSc student in Machine Intelligence at ETH Zurich focused on AI evaluation, monitoring, and alignment."
+      content="Tommaso Cerruti is an MSc student at ETH Zurich researching AI agent safety, alignment, and evaluation."
     />
-    <link rel="icon" type="image/png" href="logos/desert-logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="icon" type="image/png" sizes="64x64" href="logos/favicon.png" />
+    <link rel="preconnect" href="https://thinkingmachines.ai" crossorigin />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main>
-      <section class="container blog" id="first-content" style="background-color: #42669f;">
-        <div class="blog-title white personal-layout">
-          <section class="blog-intro bio-column" aria-label="Biography">
-            <div class="bio-copy">
-              <h1 class="title page-name"><strong>Tommaso</strong> Cerruti</h1>
+      <section class="page-shell" id="first-content">
+        <h1 class="name-mark">
+          <span>Tommaso</span>
+          <span>Cerruti</span>
+        </h1>
 
-              <p class="text">
-                I am an MSc student in Machine Intelligence at
-                <a href="https://inf.ethz.ch/" target="_blank" rel="noopener noreferrer"
-                  >ETH Zurich</a
-                >. Previously, I was a Software Engineer Intern at Amazon in the Alexa
-                AI team, where I developed a service to improve the
-                <a
-                  href="https://www.ibm.com/think/topics/named-entity-recognition"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >NER</a
-                >
-                capabilities of Alexa AI. I received my BEng in Computer Engineering
-                from
-                <a href="https://www.polito.it/en" target="_blank" rel="noopener noreferrer"
-                  >Politecnico di Torino</a
-                >, where I was part of the
-                <a
-                  href="https://www.polito.it/en/education/polito/learning-experiences-in-interdisciplinarity/grow-your-talents-ex-percorso-intraprendenti"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Young Talents Program</a
-                >
-                and was awarded the
-                <a href="https://progettoagon.it/" target="_blank" rel="noopener noreferrer"
-                  >Agon Scholarship</a
-                >
-                following my national and international achievements in rowing,
-                including an
-                <a
-                  href="https://drive.google.com/file/d/10Q4E7TR5Ip-uMSyfAg2aZsa171j0hW1y/view?usp=sharing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >indoor rowing world record</a
-                >.
-              </p>
+        <nav class="profile-links name-links" aria-label="Profile and contact links">
+          <a
+            href="https://www.linkedin.com/in/tommasocerruti/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >LinkedIn</a
+          >
+          <a
+            href="https://github.com/tommasocerruti"
+            target="_blank"
+            rel="noopener noreferrer"
+            >GitHub</a
+          >
+          <a
+            href="https://scholar.google.com/citations?view_op=list_works&amp;hl=en&amp;user=k1zD704AAAAJ"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Google Scholar</a
+          >
+          <a href="mailto:tommasocerruti@gmail.com">Email</a>
+          <button type="button" data-dialog-open="cv-dialog">CV</button>
+        </nav>
 
-              <p class="text">
-                I am interested in the safety, alignment, and evaluation of
-                autonomous AI agents. In particular, I am interested in three
-                questions:
-              </p>
+        <article class="bio-copy" aria-label="Biography">
+          <p class="lede">
+            I’m an MSc student in Machine Intelligence at
+            <a href="https://inf.ethz.ch/" target="_blank" rel="noopener noreferrer"
+              >ETH Zurich</a
+            >, focused primarily on the safety, alignment, and evaluation of AI agents. My
+            approach is empirical and engineering-driven: I enjoy building systems,
+            measuring how they behave, and improving their capabilities and efficiency.
+          </p>
 
-              <ol class="text interests-list">
-                <li>
-                  How can we distinguish agents that are robustly aligned from agents that only
-                  appear aligned in the controlled environment of an evaluation?
-                </li>
-                <li>
-                  What new attack surfaces emerge once agents have tools, memory, and
-                  long-running state, and how can we diagnose and mitigate attacks such as
-                  <a href="/memory-poisoning-lab/">memory poisoning</a>?
-                </li>
-                <li>
-                  How can malicious or compromised agents manipulate the plans, beliefs, or
-                  objectives of benign agents in multi-agent settings?
-                </li>
-              </ol>
-
-              <p class="text">
-                I have also served as a reviewer for the ICML workshops
-                <a
-                  href="https://agentwild-workshop.github.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >"Agents in the Wild: Safety, Security, and Beyond"</a
-                >,
-                <a
-                  href="https://compositional-learning.github.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >"Compositional Learning: Safety, Interpretability, and Agents"</a
-                >, and
-                <a
-                  href="https://trustworthy-ai-for-good.github.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >"Trustworthy AI for Good"</a
-                >.
-              </p>
-
-              <p class="text">
-                Outside of research, I enjoy sports (rowing, muay thai, weight
-                lifting, and hiking), travelling (the picture on the right was taken in the Sahara
-                Desert, in Morocco), and trying new foods (although nothing
-                beats a carbonara with Coca-Cola).
-              </p>
-              <p class="text last-updated">(Last updated: May 2026)</p>
-            </div>
+          <section class="compact-section research-section" aria-labelledby="focus-heading">
+            <h2 id="focus-heading">Research interests</h2>
+            <ul class="focus-list">
+              <li>
+                <span>Robust evaluation:</span>
+                eval-aware behavior, reward hacking, and broader alignment failures.
+              </li>
+              <li>
+                <span>Agent security:</span>
+                <a href="/memory-poisoning-lab/">memory poisoning/laundering</a> and risks
+                from long-running state.
+              </li>
+              <li>
+                <span>Multi-agent safety:</span>
+                manipulation, adversarial attacks, and endogenous failures.
+              </li>
+            </ul>
           </section>
 
-          <aside class="blog-cover profile-column" aria-label="Profile">
-            <img
-              class="portrait"
-              src="ProfilePicture.png"
-              alt="Tommaso Cerruti in the Sahara Desert in Morocco"
-            />
+          <section class="compact-section" aria-labelledby="background-heading">
+            <h2 id="background-heading">Background</h2>
+            <p>
+              Previously, I interned as a software engineer on Amazon’s Alexa AI team, where
+              I built a service to improve
+              <a
+                href="https://www.ibm.com/think/topics/named-entity-recognition"
+                target="_blank"
+                rel="noopener noreferrer"
+                >named entity recognition</a
+              >. I earned a BEng in Computer Engineering from
+              <a href="https://www.polito.it/en" target="_blank" rel="noopener noreferrer"
+                >Politecnico di Torino</a
+              >
+              and was selected for its
+              <a
+                href="https://www.polito.it/en/education/polito/learning-experiences-in-interdisciplinarity/grow-your-talents-ex-percorso-intraprendenti"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Young Talents Program</a
+              >. I also received the
+              <a href="https://progettoagon.it/" target="_blank" rel="noopener noreferrer"
+                >Agon Scholarship</a
+              >
+              for national and international rowing achievements, including an
+              <a
+                href="https://drive.google.com/file/d/10Q4E7TR5Ip-uMSyfAg2aZsa171j0hW1y/view?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                >indoor rowing world record</a
+              >.
+            </p>
+          </section>
 
-            <div class="profile-meta">
-              <nav class="socials" aria-label="Social links">
-                <a
-                  class="social-link"
-                  href="https://www.linkedin.com/in/tommasocerruti/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                >
-                  <img src="logos/linkedin_logo.png" alt="" />
-                  <span class="sr-only">LinkedIn</span>
-                </a>
-                <a
-                  class="social-link"
-                  href="https://github.com/tommasocerruti"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub"
-                >
-                  <img src="logos/github_logo.webp" alt="" />
-                  <span class="sr-only">GitHub</span>
-                </a>
-                <a
-                  class="social-link"
-                  href="https://scholar.google.com/citations?view_op=list_works&hl=en&user=k1zD704AAAAJ"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Google Scholar"
-                >
-                  <img src="logos/Google_Scholar_logo.svg.png" alt="" />
-                  <span class="sr-only">Google Scholar</span>
-                </a>
-                <a
-                  class="social-link"
-                  href="mailto:tommasocerruti@gmail.com"
-                  aria-label="Email"
-                >
-                  <img src="logos/Mail-logo.png" alt="" />
-                  <span class="sr-only">Email</span>
-                </a>
-                <button
-                  class="social-link social-button"
-                  type="button"
-                  aria-label="CV"
-                  data-dialog-open="cv-dialog"
-                >
-                  <img src="logos/cv-logo.png" alt="" />
-                  <span class="sr-only">CV</span>
-                </button>
-              </nav>
+          <section class="compact-section news-section" aria-labelledby="news-heading">
+            <h2 id="news-heading">News</h2>
+            <ul class="news-list">
+              <li>
+                <time datetime="2026-07">Jul 2026</time>
+                <p>
+                  Released
+                  <a
+                    href="https://www.frontierbench.ai/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Frontier-Bench v0.1</a
+                  >, which was used in the
+                  <a
+                    href="https://www.anthropic.com/news/claude-opus-5"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Claude Opus 5 release</a
+                  >.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-07">Jul 2026</time>
+                <p>
+                  Released a study of
+                  <a
+                    href="https://arxiv.org/abs/2607.07953"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >linear attention architectures</a
+                  >.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-07">Jul 2026</time>
+                <p>CocoaBench was accepted at COLM 2026.</p>
+              </li>
+              <li>
+                <time datetime="2026-06">Jun 2026</time>
+                <p>
+                  Joined EleutherAI’s
+                  <a
+                    href="https://www.eleuther.ai/soar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >SOAR program</a
+                  >
+                  for summer research on multi-agent AI safety.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-06">Jun 2026</time>
+                <p>
+                  Released
+                  <a
+                    href="https://arxiv.org/abs/2606.14516"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >EveryEvalEver</a
+                  >, a datastore with a standardized schema for AI evaluation results.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-05">May 2026</time>
+                <p>Reviewed three ICML workshops on AI safety.</p>
+              </li>
+              <li>
+                <time datetime="2026-05">May 2026</time>
+                <p>
+                  Published an article on
+                  <a
+                    href="https://huggingface.co/blog/Cerru02/safety-evals-should-project-ttc"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Safety Evals and TTC</a
+                  >, later cited in
+                  <a
+                    href="https://arxiv.org/pdf/2606.17930"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >AISI research</a
+                  >.
+                </p>
+              </li>
+              <li>
+                <time datetime="2026-04">Apr 2026</time>
+                <p>
+                  Released
+                  <a
+                    href="https://arxiv.org/abs/2604.11201"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >CocoaBench</a
+                  >, a benchmark for general digital agents.
+                </p>
+              </li>
+              <li>
+                <time datetime="2025-09">Sep 2025</time>
+                <p>
+                  Joined Amazon’s Alexa AI team as a software engineering intern, working on
+                  named entity recognition.
+                </p>
+              </li>
+            </ul>
+          </section>
 
-              <!--
-              <div class="visitor-map" aria-label="Visitor map">
-                <script
-                  type="text/javascript"
-                  id="mapmyvisitors"
-                  src="//mapmyvisitors.com/map.js?d=dLI8hdRLlmKMoAKrjh51S0SFIKZy-euZCq_VgW7CBuU&cl=ffffff&w=a"
-                ></script>
-                <noscript>
-                  <a href="https://mapmyvisitors.com/web/1c3zb" title="Visit tracker"
-                    ><img
-                      src="https://mapmyvisitors.com/map.png?d=dLI8hdRLlmKMoAKrjh51S0SFIKZy-euZCq_VgW7CBuU&cl=ffffff"
-                      alt="Visitor map"
-                  /></a>
-                </noscript>
-              </div>
-              -->
-            </div>
-          </aside>
-        </div>
+          <section class="compact-section" aria-labelledby="outside-heading">
+            <h2 id="outside-heading">Outside research</h2>
+            <p>
+              I enjoy rowing, Muay Thai, weight training, hiking, travelling, and trying
+              new foods—though nothing beats carbonara with Coca-Cola.
+            </p>
+          </section>
+        </article>
+
+        <footer class="page-footer">
+          <p class="site-credit">
+            Tommaso Cerruti © 2026 · Style inspired by
+            <a
+              href="https://thinkingmachines.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Thinking Machines Lab</a
+            >
+          </p>
+        </footer>
       </section>
 
       <dialog class="info-dialog" id="cv-dialog" aria-labelledby="cv-dialog-title">
         <div class="info-dialog-content">
-          <p id="cv-dialog-title">CV on request via email. 
-            Most projects you can find them on GitHub, whereas my publications appear on GScholar.</p>
+          <p id="cv-dialog-title">
+            Email me for a copy of my CV. My projects are on GitHub, and my publications
+            are on Google Scholar.
+          </p>
           <form method="dialog">
             <button class="dialog-close" type="submit">Close</button>
           </form>
         </div>
       </dialog>
     </main>
+
     <script>
       document.querySelectorAll("[data-dialog-open]").forEach((trigger) => {
         trigger.addEventListener("click", () => {
           const dialog = document.getElementById(trigger.dataset.dialogOpen);
           if (dialog) dialog.showModal();
         });
-      });
-
-      document.querySelectorAll(".photo-carousel").forEach((carousel) => {
-        const slides = Array.from(carousel.querySelectorAll("[data-photo-slide]"));
-        let activeIndex = Math.max(
-          0,
-          slides.findIndex((slide) => slide.classList.contains("is-active"))
-        );
-
-        if (slides.length < 2) return;
-
-        window.setInterval(() => {
-          slides[activeIndex].classList.remove("is-active");
-          activeIndex = (activeIndex + 1) % slides.length;
-          slides[activeIndex].classList.add("is-active");
-        }, 10000);
       });
     </script>
   </body>
