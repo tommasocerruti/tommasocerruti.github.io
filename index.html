@@ -15,7 +15,7 @@
       href="logos/favicon.png?v=20260725"
     />
     <link rel="preconnect" href="https://thinkingmachines.ai" crossorigin />
-    <link rel="stylesheet" href="styles.css?v=20260725" />
+    <link rel="stylesheet" href="styles.css?v=20260813" />
   </head>
   <body>
     <main>
@@ -50,10 +50,9 @@
 
         <article class="bio-copy" aria-label="Biography">
           <p class="lede">
-            I’m an MSc student in Computer Science at ETH Zurich, specializing in Machine
-            Intelligence. My work focuses primarily on the safety, alignment, and evaluation
-            of AI agents. My approach is empirical and engineering-driven: I enjoy building
-            systems, measuring how they behave, and improving their capabilities and
+            I’m an MSc student in Computer Science at ETH Zurich, majoring in AI/ML. My work
+            focuses primarily on the safety, alignment, and evaluation of AI agents. I love
+            building systems, measuring how they behave, and improving their capabilities and
             efficiency.
           </p>
 
@@ -61,23 +60,82 @@
             <h2 id="focus-heading">Research interests</h2>
             <ul class="focus-list">
               <li>
-                <span>Agent security:</span>
-                memory
-                <a
-                  href="https://tommasocerruti.github.io/memory-poisoning-lab/?utm_source=chatgpt.com"
-                  >poisoning/laundering</a
-                >, endogenous harness failures, multi-agent coordination, and risks from
-                persistent state.
+                <button
+                  class="interest-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="robust-evaluation-details"
+                >
+                  <span class="interest-arrow" aria-hidden="true"></span>
+                  <span
+                    ><strong>Robust evaluation:</strong> reliably measuring model capabilities
+                    under varying conditions.</span
+                  >
+                </button>
+                <div
+                  class="interest-subtopics"
+                  id="robust-evaluation-details"
+                  aria-hidden="true"
+                >
+                  <div>
+                    <em
+                      >Generalization to unfamiliar tasks, inference budgets, agent
+                      scaffolds, and deployment environments.</em
+                    >
+                  </div>
+                </div>
               </li>
               <li>
-                <span>Mechanistic interpretability for efficiency:</span>
-                understanding mechanisms like attention to make them more transparent and
-                efficient.
+                <button
+                  class="interest-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="agent-security-details"
+                >
+                  <span class="interest-arrow" aria-hidden="true"></span>
+                  <span
+                    ><strong>Agent security:</strong> securing persistent tool-using
+                    agents.</span
+                  >
+                </button>
+                <div
+                  class="interest-subtopics"
+                  id="agent-security-details"
+                  aria-hidden="true"
+                >
+                  <div>
+                    <em
+                      >Harness and memory failures, identity and provenance, delegation,
+                      multi-agent interactions, and endogenous failures.</em
+                    >
+                  </div>
+                </div>
               </li>
               <li>
-                <span>Robust evaluation:</span>
-                eval-aware behavior, reward hacking, broader alignment failures, and
-                separating capability signal from evaluation artifacts.
+                <button
+                  class="interest-toggle"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="neural-computation-details"
+                >
+                  <span class="interest-arrow" aria-hidden="true"></span>
+                  <span
+                    ><strong>Neural computation:</strong> understanding and designing
+                    computation for intelligence.</span
+                  >
+                </button>
+                <div
+                  class="interest-subtopics"
+                  id="neural-computation-details"
+                  aria-hidden="true"
+                >
+                  <div>
+                    <em
+                      >Learned computation, programmatic mechanisms, efficient sequence
+                      models, and interfaces for intelligent systems.</em
+                    >
+                  </div>
+                </div>
               </li>
             </ul>
           </section>
@@ -85,13 +143,13 @@
           <section class="compact-section" aria-labelledby="background-heading">
             <h2 id="background-heading">Background</h2>
             <p>
-              Previously, I interned as a software engineer on Amazon’s Alexa AI team, where
-              I built a service to improve
+              I interned as a SWE on Amazon’s Alexa AI team, where I built a service to
+              improve
               <a
                 href="https://www.ibm.com/think/topics/named-entity-recognition"
                 target="_blank"
                 rel="noopener noreferrer"
-                >named entity recognition</a
+                >NER</a
               >. I earned a BEng in Computer Engineering from
               <a href="https://www.polito.it/en" target="_blank" rel="noopener noreferrer"
                 >Politecnico di Torino</a
@@ -101,7 +159,7 @@
                 href="https://www.polito.it/en/education/polito/learning-experiences-in-interdisciplinarity/grow-your-talents-ex-percorso-intraprendenti"
                 target="_blank"
                 rel="noopener noreferrer"
-                >Young Talents Program</a
+                >Talents Program</a
               >. I also received the
               <a href="https://progettoagon.it/" target="_blank" rel="noopener noreferrer"
                 >Agon Scholarship</a
@@ -117,8 +175,16 @@
           </section>
 
           <section class="compact-section news-section" aria-labelledby="news-heading">
-            <h2 id="news-heading">News</h2>
-            <ul class="news-list">
+            <div class="news-heading-row">
+              <h2 id="news-heading">News</h2>
+              <span class="news-scroll-hint" aria-hidden="true">Scroll for older news ↓</span>
+            </div>
+            <div class="news-scroll">
+              <ul
+                class="news-list"
+                tabindex="0"
+                aria-label="News archive; scroll for older items"
+              >
               <li>
                 <time datetime="2026-07">Jul 2026</time>
                 <p>
@@ -127,7 +193,7 @@
                     href="https://www.frontierbench.ai/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    >Frontier-Bench v0.1</a
+                    >Terminal-Bench 3</a
                   >, used in the
                   <a
                     href="https://www.anthropic.com/news/claude-opus-5"
@@ -219,14 +285,15 @@
                   named entity recognition.
                 </p>
               </li>
-            </ul>
+              </ul>
+            </div>
           </section>
 
           <section class="compact-section" aria-labelledby="outside-heading">
             <h2 id="outside-heading">Outside research</h2>
             <p>
               I enjoy rowing, Muay Thai, weight training, hiking, travelling, and trying
-              new foods—though nothing beats carbonara with Coca-Cola.
+              new foods (though nothing beats carbonara with Coca-Cola).
             </p>
           </section>
         </article>
@@ -263,6 +330,32 @@
           const dialog = document.getElementById(trigger.dataset.dialogOpen);
           if (dialog) dialog.showModal();
         });
+      });
+
+      document.querySelectorAll(".interest-toggle").forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const subtopics = document.getElementById(toggle.getAttribute("aria-controls"));
+          if (!subtopics) return;
+
+          const isOpen = toggle.getAttribute("aria-expanded") === "true";
+          toggle.setAttribute("aria-expanded", String(!isOpen));
+          subtopics.setAttribute("aria-hidden", String(isOpen));
+          subtopics.classList.toggle("is-open", !isOpen);
+        });
+      });
+
+      document.querySelectorAll(".news-scroll").forEach((scrollRegion) => {
+        const newsList = scrollRegion.querySelector(".news-list");
+        if (!newsList) return;
+
+        const updateScrollCue = () => {
+          const isAtEnd =
+            newsList.scrollTop + newsList.clientHeight >= newsList.scrollHeight - 2;
+          scrollRegion.classList.toggle("is-at-end", isAtEnd);
+        };
+
+        newsList.addEventListener("scroll", updateScrollCue, { passive: true });
+        updateScrollCue();
       });
     </script>
   </body>

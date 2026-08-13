@@ -16,35 +16,17 @@
     format("woff2");
 }
 
-@font-face {
-  font-family: "Iowan Old Style BT";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_regular.woff2")
-    format("woff2");
-}
-
-@font-face {
-  font-family: "Iowan Old Style BT";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("https://thinkingmachines.ai/fonts/iowan-old-style/iowan-old-style_bold.woff2")
-    format("woff2");
-}
-
 :root {
   color-scheme: light;
   --paper: #ffffff;
-  --ink: #282828;
+  --ink: #2d2d2d;
   --muted: #676767;
   --quiet: #a5a5a5;
   --quiet-hover: #c4c4c4;
   --line: #dadada;
   --sans: "GT America", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --serif: "Iowan Old Style BT", Iowan Old Style, Georgia, serif;
+  --body-font: Georgia, "Times New Roman", serif;
 }
 
 *,
@@ -64,10 +46,11 @@ body {
   min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--serif);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.6;
+  font-family: var(--body-font);
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.52;
+  letter-spacing: -0.01em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -112,7 +95,7 @@ button {
   margin: 0 auto 1rem;
   color: var(--quiet);
   font-family: var(--sans);
-  font-size: clamp(3.1rem, 7vw, 4.1rem);
+  font-size: clamp(2.9rem, 6.5vw, 3.8rem);
   font-weight: 300;
   letter-spacing: -0.04em;
   line-height: 0.91;
@@ -174,19 +157,131 @@ button {
 
 .focus-list {
   margin: 0;
-  padding-left: 1.3rem;
+  padding: 0;
+  list-style: none;
 }
 
 .focus-list li {
   margin: 0 0 0.42rem;
-  padding-left: 0.15rem;
+}
+
+.interest-toggle {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.interest-arrow {
+  display: block;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin: 0.48em 0 0 0.08rem;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform 240ms ease;
+}
+
+.interest-toggle[aria-expanded="true"] .interest-arrow {
+  transform: rotate(135deg);
+}
+
+.interest-subtopics {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-left: 1rem;
+  opacity: 0;
+  transition: grid-template-rows 280ms ease, opacity 220ms ease;
+}
+
+.interest-subtopics > div {
+  overflow: hidden;
+}
+
+.interest-subtopics.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.interest-subtopics em {
+  display: block;
+  padding-top: 0.2rem;
+}
+
+.news-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.news-heading-row h2 {
+  margin: 0;
+}
+
+.news-scroll-hint {
+  color: var(--muted);
+  font-size: 0.82em;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.news-scroll {
+  position: relative;
+}
+
+.news-scroll::after {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 1px;
+  left: 0;
+  height: 2.4rem;
+  background: linear-gradient(to bottom, transparent, var(--paper));
+  content: "";
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.news-scroll.is-at-end::after {
+  opacity: 0;
 }
 
 .news-list {
+  max-height: 15rem;
   margin: 0;
-  padding: 0;
+  padding: 0 0.55rem 0 0;
   border-bottom: 1px solid var(--line);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--quiet) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
   list-style: none;
+}
+
+.news-list:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.news-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.news-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--quiet);
 }
 
 .news-list li {
@@ -240,7 +335,7 @@ button {
 .site-credit {
   margin: 0;
   color: var(--muted);
-  font-family: var(--sans);
+  font-family: var(--body-font);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -296,7 +391,7 @@ button {
 
   .name-mark {
     margin-bottom: 1rem;
-    font-size: clamp(2.9rem, 14vw, 3.7rem);
+    font-size: clamp(2.7rem, 13vw, 3.4rem);
   }
 
   .name-links {
@@ -325,6 +420,12 @@ button {
 
   .name-mark {
     animation: none;
+    transition: none;
+  }
+
+  .interest-arrow,
+  .interest-subtopics,
+  .news-scroll::after {
     transition: none;
   }
 }
