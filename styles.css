@@ -344,6 +344,73 @@ button {
   text-decoration: none;
 }
 
+/* Boccadasse finale: static by default, progressively enhanced by finale.js. */
+#first-content {
+  padding-bottom: 1.25rem;
+}
+
+.finale-section {
+  position: relative;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.finale-pin {
+  display: grid;
+  place-items: center;
+  padding: 1rem 16px;
+}
+
+.finale-figure {
+  width: min(100%, 660px);
+  margin: 0;
+  text-align: center;
+}
+
+.finale-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 68vh;
+  max-height: 68svh;
+  overflow: visible;
+}
+
+.finale-art :is(path, line, polyline, polygon, rect, circle, ellipse) {
+  fill: none;
+  stroke: currentColor;
+  /* Keep strokes and dash lengths in the same SVG coordinate system. */
+  stroke-width: 1.8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.finale-caption {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.025em;
+}
+
+.finale-footer {
+  width: min(660px, calc(100% - 32px));
+  margin: 0 auto;
+  padding-bottom: 2.5rem;
+}
+
+@media (max-width: 600px) {
+  .finale-art :is(path, line, polyline, polygon, rect, circle, ellipse) {
+    stroke-width: 2.6px;
+  }
+}
+
+@media (max-height: 500px) and (min-width: 601px) {
+  .finale-art :is(path, line, polyline, polygon, rect, circle, ellipse) {
+    stroke-width: 2.2px;
+  }
+}
+
 .info-dialog {
   width: min(420px, calc(100vw - 2rem));
   max-width: none;
@@ -409,6 +476,16 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .finale-art :is(path, line, polyline, polygon, rect, circle, ellipse) {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    visibility: visible !important;
+  }
+
+  .finale-art [data-finale-boat] {
+    transform: none !important;
+  }
+
   html {
     scroll-behavior: auto;
   }
