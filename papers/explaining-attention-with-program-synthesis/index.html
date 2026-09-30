@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Explaining Attention with Program Synthesis — Tommaso Cerruti</title>
+    <meta
+      name="description"
+      content="Notes on Explaining Attention with Program Synthesis, by Amiri Hayes et al."
+    />
+    <link rel="icon" type="image/png" sizes="64x64" href="../../logos/favicon.png?v=20260725" />
+    <link rel="preconnect" href="https://thinkingmachines.ai" crossorigin />
+    <link rel="stylesheet" href="../../styles.css?v=20261005-papers" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <a class="papers-home" href="../">← Paper Summaries</a>
+
+      <header class="papers-intro">
+        <h1 class="papers-heading">Paper Summaries</h1>
+        <blockquote><p>raw text and pseudocode only</p></blockquote>
+        <p class="papers-note">
+          (written without LLMs, but used LLMs to double-check, correct, or explain concepts)
+        </p>
+      </header>
+
+      <article class="paper-summary" id="explaining-attention-with-program-synthesis" aria-labelledby="attention-title">
+        <header class="paper-metadata">
+          <h2 id="attention-title"><strong>title:</strong> Explaining Attention with Program Synthesis</h2>
+          <p><strong>authors:</strong> Amiri Hayes et al.</p>
+          <p><strong>link:</strong> <a href="https://arxiv.org/abs/2606.19317" target="_blank" rel="noopener noreferrer">https://arxiv.org/abs/2606.19317</a></p>
+          <p><strong>labels:</strong> interpretability, neural computation</p>
+        </header>
+
+        <p><strong>problem:</strong> understanding computations performed by deep networks is hard.</p>
+
+        <p><strong>current situation:</strong> neither top-down (training probes for human-defined concepts) nor bottom-up (generating summaries of the inputs that activate a feature/outputs that the feature promotes) are enough to provide a full formal description of neural computation.</p>
+
+        <p><strong>proposal:</strong> explain computation through program synthesis, i.e., finding executable code that approximates the computation performed by components, which provide a middle-ground between billion-parameter models and natural language. furthermore, they are human-readable and formally verifiable, while also being able to be directly substituted for neural components.</p>
+
+        <p><strong>focus:</strong> generating programmatic explanations of how attention heads compute attention weights in transformer LMs. for each attention head, extract a set of example attention maps on training examples, and prompt another LM to generate a set of candidate Python programs that can reproduce those attention maps given only input text. note: in the abstract they claim "replace the attention heads", but this overstates what is done, since a head also computes values and combines them using those weights, whereas what's being replaced is their attention matrices, retaining the value projections and weighted aggregation.</p>
+
+        <pre tabindex="0" role="region" aria-label="Pseudocode comparing neural and programmatic attention"><code># shared computation
+tokens = tokenize(input_text)
+embeddings = embed(tokens)
+hidden_states = preceding_layers(embeddings)  # including normalization
+V = hidden_states x W_V
+
+# neural route
+Q = hidden_states x W_Q
+K = hidden_states x W_K
+attention_weights = softmax(Q x K_transpose / sqrt(head_dimension))
+
+# OR programmatic route
+attention_weights = program(input_text)
+
+# shared aggregation
+attention_outputs = attention_weights x V</code></pre>
+
+        <p><strong>result takeaway:</strong> across small scale llms (e.g., Llama-3B), the attention matrices of the best-matched 25% of heads can be replaced with programmatic ones, incurring only 16% average increase in perplexity, and no substantial effect on downstream question-answering performance.</p>
+
+        <section aria-labelledby="attention-method">
+          <h3 id="attention-method">method:</h3>
+          <ol>
+            <li>record the ground-truth attention activation matrices of an LLM M (A_1, A_2, ..., A_n)</li>
+            <li>provide another LLM S those ground truths prompting it to generate python code that could reproduce them</li>
+            <li>execute them against some text, and score them against the ground truth using a proximity metric like JSD</li>
+            <li>the top candidate (i.e., lowest JSD) is picked, and undergoes an additional round of feedback-conditioned refinement, i.e., showing S the examples where it performs best and worst, and revise the program (selected only if it performs better on held-out validation examples)</li>
+            <li>for each head, select the best-fitting program from the whole program library for that model using IoU (which can be a program originally generated for another head).</li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="attention-evaluation">
+          <h3 id="attention-evaluation">evaluation:</h3>
+          <ul>
+            <li>attention alignment -- does the program produce attention matrices similar to the original ones? measured via intersection over union (IoU) between the synthetic programs and the neural patterns.</li>
+            <li>causal head replacement -- does the approximation preserve the model's behavior beyond being a simple proxy to resemble its patterns? measured via perplexity and task accuracy.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="attention-procedure">
+          <h3 id="attention-procedure">procedure (head replacement analysis):</h3>
+          <ol>
+            <li>heads are replaced greedily in descending order of IoU score</li>
+            <li>examining perplexity changes on the dataset processed by models with original heads and programmatic proxies (note: this is in-distribution evaluation, since it's the same dataset used to derive the programs)</li>
+            <li>plot normalized perplexity increase (%) on the y-axis vs heads replaced (%) on the x-axis.</li>
+            <li>evaluate OOD generalization on wide range of mcq reasoning tasks.</li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="attention-takeaways">
+          <h3 id="attention-takeaways">interesting takeaways:</h3>
+          <ul>
+            <li>great difference between encoder-only and decoder-only models: encoder-only programs are much harder to synthesize. this is likely due to the masked language modelling objective that produces bidirectional attention distributions that are more complex than the next-token prediction objective. in particular, IoU: BERT 33.95% vs. Llama-3.2-3B 79.42%. important note: BERT is the only encoder tried.</li>
+            <li>IoU scores monotonically increase with model scale. this likely reflects functional specialization at scale: individual heads serve narrower and more tractable roles.</li>
+            <li>positional programs dominate early layers, while syntactic programs account for a larger share of middle-layer assignments.</li>
+            <li>IoU scores are indeed good proxy metrics for functionality (Spearman correlation &lt; -0.9 with perplexity increase for the three decoder-only models)</li>
+            <li>OOD downstream task performance is not monotonically decreasing with programmatic coverage</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="attention-limitations">
+          <h3 id="attention-limitations">limitation:</h3>
+          <ul>
+            <li>no model's attention heads are fully characterized</li>
+            <li>preserving task performance alone cannot distinguish "we understood this computation" from "we don't need this computation"</li>
+          </ul>
+        </section>
+      </article>
+
+      <footer class="page-footer">
+        <p class="site-credit">Tommaso Cerruti © 2026</p>
+      </footer>
+    </main>
+  </body>
+</html>

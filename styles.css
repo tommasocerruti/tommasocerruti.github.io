@@ -480,6 +480,122 @@ button {
   color: var(--ink);
 }
 
+.papers-home {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--muted);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.papers-heading {
+  margin: 0 0 1rem;
+  color: var(--quiet);
+  font-family: var(--sans);
+  font-size: clamp(2.4rem, 6.5vw, 3.2rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.papers-intro {
+  margin-bottom: 2.5rem;
+}
+
+.papers-intro blockquote {
+  margin: 0 0 0.65rem;
+  padding-left: 0.85rem;
+  border-left: 1px solid var(--line);
+}
+
+.papers-intro p {
+  margin: 0;
+}
+
+.papers-note {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.paper-summary {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.papers-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.papers-list li + li {
+  margin-top: 0.75rem;
+}
+
+.papers-labels {
+  color: var(--muted);
+}
+
+.paper-summary h2,
+.paper-summary h3 {
+  margin: 0 0 0.65rem;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.paper-summary h2 {
+  font-weight: 400;
+}
+
+.paper-summary p {
+  margin: 0 0 1rem;
+}
+
+.paper-summary strong {
+  font-weight: 700;
+}
+
+.paper-metadata {
+  margin-bottom: 1.75rem;
+}
+
+.paper-metadata p {
+  margin-bottom: 0.35rem;
+}
+
+.paper-summary section {
+  margin-top: 1.5rem;
+}
+
+.paper-summary ul,
+.paper-summary ol {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.paper-summary li + li {
+  margin-top: 0.55rem;
+}
+
+.paper-summary pre {
+  margin: 1.5rem 0;
+  padding: 0.9rem 0 0.9rem 1rem;
+  border-left: 1px solid var(--line);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.65;
+  letter-spacing: normal;
+}
+
+.paper-summary pre:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.paper-summary code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
 @media (max-width: 700px) {
   .page-shell {
     padding: 2.25rem 16px 2.5rem;
