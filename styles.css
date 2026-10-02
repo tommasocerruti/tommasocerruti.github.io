@@ -393,6 +393,35 @@ button {
   letter-spacing: 0.025em;
 }
 
+.finale-boat-link {
+  cursor: pointer;
+}
+
+.finale-boat-link:not([href]) {
+  pointer-events: none;
+  cursor: default;
+}
+
+.finale-art .finale-boat-hit-area {
+  fill: transparent;
+  stroke: none;
+}
+
+.finale-boat-link:hover path,
+.finale-boat-link:focus-visible path {
+  opacity: 1;
+}
+
+.finale-boat-link:focus {
+  outline: none;
+}
+
+.finale-boat-link:focus-visible .finale-boat-hit-area {
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-dasharray: 6 6;
+}
+
 .finale-footer {
   width: min(660px, calc(100% - 32px));
   margin: 0 auto;

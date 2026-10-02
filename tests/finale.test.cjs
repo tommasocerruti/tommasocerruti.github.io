@@ -37,7 +37,8 @@ async function settle(page) {
 
 async function drawing(page) {
   return page.locator('#finale').evaluate(svg => {
-    const paths = [...svg.querySelectorAll('path, line, polyline, polygon, circle, ellipse, rect')];
+    const paths = [...svg.querySelectorAll('path, line, polyline, polygon, circle, ellipse, rect')]
+      .filter(path => !path.closest('[data-no-draw]'));
     const shown = paths.map(path => {
       const style = getComputedStyle(path);
       return style.visibility === 'hidden' ? 0 : 1 - parseFloat(style.strokeDashoffset) / path.getTotalLength();
@@ -162,5 +163,60 @@ test('a half-drawn stroke is visibly half drawn when the SVG is scaled down', as
   }, screenshot.toString('base64'));
   assert.ok(samples[0] < 30, 'First quarter of the stroke is painted');
   assert.ok(samples[1] > 240, 'Last quarter stays blank at halfway progress');
+  await page.close();
+});
+
+test('the boat becomes a keyboard-accessible surprise only after the drawing completes', async () => {
+  const page = await browser.newPage();
+  // Verify navigation without loading the external video or playing audio.
+  await page.context().route('https://www.youtube.com/**', route => route.fulfill({ body: '<title>Video destination</title>' }));
+  await page.goto(origin);
+  const link = page.locator('.finale-boat-link');
+  assert.equal(await link.count(), 1, 'Boat has a surprise link');
+  assert.equal(await link.getAttribute('href'), null);
+  assert.equal(await link.getAttribute('tabindex'), '-1');
+  await page.evaluate(() => scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+  await settle(page);
+  const accessibleLink = page.getByRole('link', { name: 'Sailboat (opens in a new tab)' });
+  assert.equal(await accessibleLink.count(), 1);
+  await link.focus();
+  const popupPromise = page.waitForEvent('popup');
+  await page.keyboard.press('Enter');
+  const popup = await popupPromise;
+  await popup.waitForLoadState();
+  assert.equal(popup.url(), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  await popup.close();
+  await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+  await settle(page);
+  assert.equal(await link.getAttribute('href'), null, 'Scrolling back disables the invisible link');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForFunction(() => document.querySelector('.finale-boat-link').hasAttribute('href'));
+  assert.equal(await link.getAttribute('tabindex'), '0');
+  await page.close();
+});
+
+test('the boat can be tapped on mobile and linked without JavaScript', async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, javaScriptEnabled: false });
+  await page.context().route('https://www.youtube.com/**', route => route.fulfill({ body: '<title>Video destination</title>' }));
+  await page.goto(origin);
+  const link = page.getByRole('link', { name: 'Sailboat (opens in a new tab)' });
+  assert.equal(await link.count(), 1);
+  await link.scrollIntoViewIfNeeded();
+  const hit = await page.locator('.finale-boat-hit-area').evaluate(area => {
+    const box = area.getBoundingClientRect();
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    const isBoatLink = (x, y) => Boolean(document.elementFromPoint(x, y)?.closest('.finale-boat-link'));
+    return { boat: isBoatLink(x, y), water: isBoatLink(x - 20, y) };
+  });
+  assert.equal(hit.boat, true, 'Boat itself can be tapped');
+  assert.equal(hit.water, false, 'Nearby water is not clickable');
+  assert.equal(await link.locator('title').count(), 0, 'No spoiler tooltip');
+  const popupPromise = page.waitForEvent('popup');
+  await link.tap();
+  const popup = await popupPromise;
+  await popup.waitForLoadState();
+  assert.equal(popup.url(), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  await popup.close();
   await page.close();
 });

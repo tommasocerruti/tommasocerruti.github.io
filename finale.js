@@ -4,12 +4,29 @@
   if (!section || !svg) return;
 
   const boat = svg.querySelector('[data-finale-boat]');
+  const boatLink = svg.querySelector('.finale-boat-link');
+  const boatDestination = boatLink?.getAttribute('href');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = value => Math.max(0, Math.min(1, value));
   let strokes;
   let totalLength = 0;
   let frame = 0;
   let lastProgress = -1;
+  let boatAvailable;
+
+  function setBoatAvailable(available) {
+    if (!boatLink || !boatDestination || available === boatAvailable) return;
+    boatAvailable = available;
+    boatLink.setAttribute('tabindex', available ? '0' : '-1');
+    if (available) {
+      boatLink.setAttribute('href', boatDestination);
+      boatLink.removeAttribute('aria-hidden');
+    } else {
+      boatLink.removeAttribute('href');
+      if (document.activeElement === boatLink) boatLink.blur();
+      boatLink.setAttribute('aria-hidden', 'true');
+    }
+  }
 
   function measureStrokes() {
     // Group/document order is the drawing order: skyline, village, shore,
@@ -30,6 +47,7 @@
   function render(progress) {
     if (progress === lastProgress) return;
     lastProgress = progress;
+    setBoatAvailable(progress >= 0.88);
     // Finish the drawing before the boat moves through the final 12%.
     // Ease into the reveal so early scrolling leaves a lighter, sparser sketch.
     const drawn = Math.pow(clamp(progress / 0.88), 1.65) * totalLength;
@@ -83,6 +101,7 @@
         stroke.offset = null;
       });
       boat?.removeAttribute('transform');
+      setBoatAvailable(true);
       return;
     }
     if (!strokes) measureStrokes();
