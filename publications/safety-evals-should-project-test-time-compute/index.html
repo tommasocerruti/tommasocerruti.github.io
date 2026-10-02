@@ -9,7 +9,7 @@
     <meta name="citation_title" content="Safety Evals Should Project Test-Time Compute" />
     <meta name="citation_author" content="Tommaso Cerruti" />
     <meta name="citation_publication_date" content="2026/05/11" />
-    <meta name="citation_pdf_url" content="https://tommasocerruti.github.io/papers/safety-evals-should-project-test-time-compute.pdf" />
+    <meta name="citation_pdf_url" content="https://tommasocerruti.github.io/publications/safety-evals-should-project-test-time-compute/safety-evals-should-project-test-time-compute.pdf" />
     <link rel="icon" type="image/png" sizes="64x64" href="/logos/favicon.png?v=20260725" />
     <link rel="stylesheet" href="/styles.css?v=20260930-finale-anchored" />
     <style>
@@ -24,13 +24,13 @@
         <h1 class="publication-title" id="publication-title">Safety Evals Should Project Test-Time Compute</h1>
         <p>Tommaso Cerruti</p>
         <p class="publication-meta"><time datetime="2026-05-11">May 11, 2026</time> · Hugging Face Community Article</p>
-        <section class="compact-section" aria-labelledby="summary-heading">
-          <h2 id="summary-heading">Summary</h2>
-          <p>A system that appears safe under the evaluator’s limited test-time compute may become unsafe under the larger, adaptive, and economically rational budgets that real adversaries can spend; hence, safety evals should be "budget-labeled" and project test-time compute.</p>
+        <section class="compact-section" aria-labelledby="abstract-heading">
+          <h2 id="abstract-heading">Abstract</h2>
+          <p>Safety evaluations often measure model behavior under a fixed, limited inference budget, while real adversaries can spend more effort through repeated attempts, search, tools, long-context prompting, and agentic scaffolding. This article argues that safety claims should account for test-time compute and describe how harmful success changes with adversarial effort. It frames evaluation as a risk surface over budgets, deployment configurations, scaffolds, and attacker strategies, and highlights the economic gap between what evaluators can afford to test and what attackers may find worthwhile. A minimal evaluation protocol measures multiple effort tiers, tests different attacker types, reports uncertainty and cost, and separates observed results from higher-budget projections. Static safety checks remain useful, but release decisions should rely on scoped, budget-labeled claims rather than generalizing from a single low-budget score.</p>
         </section>
         <nav class="profile-links" aria-label="Publication links">
           <a href="https://huggingface.co/blog/Cerru02/safety-evals-should-project-ttc">Hugging Face</a>
-          <a href="/papers/safety-evals-should-project-test-time-compute.pdf">PDF</a>
+          <a href="https://tommasocerruti.github.io/publications/safety-evals-should-project-test-time-compute/safety-evals-should-project-test-time-compute.pdf">PDF</a>
         </nav>
       </article>
     </main>
