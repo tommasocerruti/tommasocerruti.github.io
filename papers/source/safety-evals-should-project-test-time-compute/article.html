@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Safety Evals Should Project Test-Time Compute</title>
+<style>
+@page { size: A4; margin: 20mm 18mm; }
+body { font: 11pt/1.45 Georgia, "Times New Roman", serif; color: #222; }
+h1 { font-size: 22pt; line-height: 1.2; margin: 0 0 8pt; }
+h2 { font-size: 14pt; margin-top: 20pt; break-after: avoid; }
+h3 { font-size: 12pt; break-after: avoid; }
+p { margin: 0 0 9pt; }
+a { color: #222; overflow-wrap: anywhere; }
+.author { font-size: 13pt; }
+.note { font-size: 9pt; color: #555; margin: 12pt 0 18pt; }
+img { display: block; max-width: 100%; max-height: 85mm; object-fit: contain; margin: 12pt auto; }
+table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 12pt 0; }
+th, td { border: 1px solid #ccc; padding: 5pt; text-align: left; vertical-align: top; }
+thead { display: table-header-group; }
+tr, img, blockquote { break-inside: avoid; }
+li { margin-bottom: 6pt; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 9pt; }
+math { font-family: "Cambria Math", "STIX Two Math", serif; }
+</style>
+</head>
+<body>
+<h1>Safety Evals Should Project Test-Time Compute</h1>
+<p class="author">Tommaso Cerruti</p>
+<p><time datetime="2026-05-11">May 11, 2026</time></p>
+<p class="note">Author version of an article originally published as a Hugging Face Community Article.<br>
+<a href="https://huggingface.co/blog/Cerru02/safety-evals-should-project-ttc">https://huggingface.co/blog/Cerru02/safety-evals-should-project-ttc</a></p>
+
+<p><strong>One sentence summary:</strong> A system that appears safe under the evaluator’s limited test-time compute may become unsafe under the larger, adaptive, and economically rational budgets that real adversaries can spend; hence, safety evals should be "budget-labeled" and project test-time compute.</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/65044901221035b9ee187178/Vu1qHvRulPknCjJt6NWPH.png" rel="nofollow"><img src="figure-1.png" alt="ChatGPT Image May 11, 2026, 05_47_25 PM"></a></p>
+<p>Safety evaluations often ask a simple question: “Can this model do something dangerous?” For modern AI systems, that question is too static, and the more relevant question becomes: “Can this model do something dangerous if it is given more time, more samples, more tools, more retries, better scaffolding, or a larger inference budget?”</p>
+<p>Imagine a model that refuses a harmful request once. Under a cheap evaluation, this looks like success, but an adversary does not have to stop after one attempt; they can generate 1,000 prompt variants, use another model to mutate failures into better attacks, add long-context demonstrations, wrap the model in an agent loop, give it tools, and spend more effort only where the expected payoff is high. Therefore, the safety question is no longer “Did the model refuse the first prompt?”, but “How does the probability of harmful success change as the adversary spends more inference-time effort?”</p>
+<p>This shift matters because capability is no longer fixed at deployment: a model’s practical ability can change substantially depending on how much computation and optimization pressure are spent at inference time. Chain-of-thought prompting, self-consistency, tree search, best-of-N sampling, agentic scaffolds, long-context prompting, and tool-use loops all turn inference into an adaptive process.</p>
+<p>A model that appears safe under a cheap, single-shot evaluation may not remain safe under a high-effort adversarial evaluation. This does not make static safety checks useless, but raises awareness that cheap safety evaluations should be treated as one measured point on a larger risk surface.</p>
+<p>For a model <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi></mrow></math>, deployment configuration <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi></mrow></math>, attacker strategy <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi></mrow></math>, and test-time compute budget <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math>, the relevant object is not just a binary pass/fail score, but a risk surface:</p>
+<p><span><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>b</mi><mo separator="true">;</mo><mi>m</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo><mo>=</mo><mi>Pr</mi><mo>⁡</mo><mo stretchy="false">(</mo><mtext>harmful&nbsp;success</mtext><mo>∣</mo><mi>m</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow></math></span></p>
+<p>Here <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math> should be understood broadly (it may include the number of samples, attack attempts, human review steps, retrieved documents, or, more simply, monetary cost).</p>
+<p>A conventional safety benchmark estimates something like</p>
+<p><span><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>R</mi><mo stretchy="false">(</mo><msub><mi>B</mi><mtext>eval</mtext></msub><mo separator="true">;</mo><mi>m</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow></math></span></p>
+<p>where <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>eval</mtext></msub></mrow></math> is the evaluator’s chosen budget. However, the safety-relevant question is often closer to</p>
+<p><span><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>R</mi><mo stretchy="false">(</mo><msub><mi>B</mi><mtext>adv</mtext></msub><mo separator="true">;</mo><mi>m</mi><mo separator="true">,</mo><mi>c</mi><mo separator="true">,</mo><mi>a</mi><mo stretchy="false">)</mo><mo separator="true">,</mo></mrow></math></span></p>
+<p>where <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>adv</mtext></msub></mrow></math> is the budget an adversary would rationally spend. If <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>adv</mtext></msub><mo>≫</mo><msub><mi>B</mi><mtext>eval</mtext></msub></mrow></math>, then a low-budget safety pass may show that the system resists weak attacks, but it does not show that the system resists economically motivated search.</p>
+<p><a href="https://cdn-uploads.huggingface.co/production/uploads/65044901221035b9ee187178/NVISol3uuS3S7kZX2VsfK.png" rel="nofollow"><img src="figure-2.png" alt="ChatGPT Image May 11, 2026, 06_22_52 PM (2)"></a></p>
+<blockquote>
+<p>Figure 1: Example risk curve as test-time compute increases. The solid segment represents the directly measured low-budget regime up to <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>eval</mtext></msub></mrow></math>, while the dashed segment illustrates a possible higher-budget projection toward <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>adv</mtext></msub></mrow></math>. The sigmoid-like shape is only illustrative, in practice the risk curve is highly variable depending on the model, scaffold, attacker, and deployment setting.</p>
+</blockquote>
+<h2>Test-time compute changes what models can do</h2>
+<p>Test-time compute is often reduced to “more reasoning tokens,” but this is only one part of the picture. In practice, many inference-time resources can change model behavior.</p>
+<div>
+	<table>
+		<thead><tr>
+<th>Mechanism</th>
+<th>What scales</th>
+<th>Safety relevance</th>
+<th>Example evidence</th>
+</tr>
+
+		</thead><tbody><tr>
+<td>Self-consistency</td>
+<td>Sampled reasoning paths</td>
+<td>A model may fail once but succeed after repeated reasoning attempts</td>
+<td>Self-consistency reports gains of +17.9% on GSM8K, +11.0% on SVAMP, and +12.2% on AQuA. <a href="#references" rel="nofollow">[1]</a></td>
+</tr>
+<tr>
+<td>Tree search</td>
+<td>Explored intermediate states</td>
+<td>One generation may miss capabilities that appear under search</td>
+<td>Tree of Thoughts reports GPT-4 solving 4% of Game of 24 with chain-of-thought versus 74% with tree search. <a href="#references" rel="nofollow">[2]</a></td>
+</tr>
+<tr>
+<td>Adaptive compute allocation</td>
+<td>Budget per problem</td>
+<td>Attackers can spend more effort exactly where defenses are weak</td>
+<td>Snell et al. report more than 4 times efficiency over best-of-N, and cases where test-time compute beats a 14 times larger model under FLOP matching. <a href="#references" rel="nofollow">[3]</a></td>
+</tr>
+<tr>
+<td>Best-of-N sampling</td>
+<td>Prompt variants or completions</td>
+<td>Low per-attempt risk can become high cumulative risk</td>
+<td>Best-of-N Jailbreaking reports 89% ASR on GPT-4o and 78% on Claude 3.5 Sonnet with 10,000 augmented prompts. <a href="#references" rel="nofollow">[4]</a></td>
+</tr>
+<tr>
+<td>Long-context demonstrations</td>
+<td>Number of in-context examples</td>
+<td>Long context becomes an attack surface</td>
+<td>Many-shot jailbreaking finds that attack effectiveness follows a power law up to hundreds of shots. <a href="#references" rel="nofollow">[5]</a></td>
+</tr>
+<tr>
+<td>Agentic scaffolding</td>
+<td>Tool calls, retries, subagents, memory</td>
+<td>Misuse may appear only in a realistic system context</td>
+<td>LLM web-hacking agents have been shown to perform tasks such as blind database schema extraction and SQL injection without human feedback. <a href="#references" rel="nofollow">[6]</a></td>
+</tr>
+</tbody>
+	</table>
+</div>
+<p>Inference is becoming more like search, and search changes capability.</p>
+<h2>The attack surface is broader than direct harmful prompts</h2>
+<p>The same framing applies beyond direct jailbreaks. Real systems retrieve documents, browse websites, read emails, call APIs, maintain memory, and interact with external environments. Once this happens, the attack surface shifts from “what did the user type?” to “what information did the system consume, store, trust, and act on?”</p>
+<p>Indirect prompt injection is a good example. Greshake et al. argue that LLM-integrated applications blur the line between data and instructions, enabling attackers to place malicious instructions in content likely to be retrieved rather than directly in the user prompt. They demonstrate risks including data theft, application manipulation, and control over API calls. <a href="#references" rel="nofollow">[7]</a></p>
+<p>Memory-augmented agents sharpen the problem further. AgentPoison attacks generic and RAG-based LLM agents by poisoning long-term memory or knowledge bases. The authors report average attack success rates above 80%, less than 1% benign-performance degradation, and poison rates below 0.1% across their evaluated agents. <a href="#references" rel="nofollow">[8]</a></p>
+<p>A one-shot refusal test does not capture these risks. A model can refuse a direct harmful request and still fail when the attack arrives through retrieved web content, poisoned memory, a malicious document, a compromised tool output, or a long sequence of apparently benign interactions.</p>
+<h2>The economic asymmetry</h2>
+<p>The evaluator’s budget is often determined by research funding, whereas the adversary’s budget is determined by expected payoff.</p>
+<p>A simple way to express this is:</p>
+<p><span><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msubsup><mi>B</mi><mtext>adv</mtext><mo>∗</mo></msubsup><mo>=</mo><mi>arg</mi><mo>⁡</mo><munder><mrow><mi>max</mi><mo>⁡</mo></mrow><mi>b</mi></munder><mrow><mo fence="true">[</mo><mi>V</mi><mo>⋅</mo><mi>R</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mo>−</mo><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mo fence="true">]</mo></mrow><mo separator="true">,</mo></mrow></math></span></p>
+<p>where <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>V</mi></mrow></math> is the payoff from a successful attack, <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></math> is the probability of success at budget <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math>, and <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>C</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></math> is the cost of compute, tool use, and human labor.</p>
+<p>In the one-dimensional case, the intuition is simple: a rational adversary keeps spending while the marginal expected benefit exceeds the marginal cost. If the risk curve is differentiable, this corresponds roughly to spending while</p>
+<p><span><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>V</mi><mo>⋅</mo><msup><mi>R</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mo>&gt;</mo><msup><mi>C</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo><mi mathvariant="normal">.</mi></mrow></math></span></p>
+<p>The point is not that every attacker has frontier-lab resources, but rather that, in some high-upside abuse domains, spending thousands or tens of thousands of dollars on inference can be economically rational if the expected payoff is large enough.</p>
+<p>The economic scale of cyber-enabled crime makes this hard to ignore. The FBI’s 2025 IC3 report says cyber-enabled fraud accounted for 452,868 complaints and about $17.7 billion in reported losses, representing 45% of complaints and 85% of reported losses to IC3 that year. <a href="#references" rel="nofollow">[9]</a> Chainalysis reported that funds stolen from crypto platforms increased to $2.2 billion in 2024, across 303 hacking incidents. <a href="#references" rel="nofollow">[10]</a></p>
+<p>Evaluators ask “What can we afford to test?”, while attackers ask “What is worth spending to succeed?”. A safety evaluation that only answers the first question can systematically underestimate the second.</p>
+<h2>The affordability problem is also an accountability problem</h2>
+<p>TTC-aware safety evaluation is expensive.</p>
+<p>Recent EvalEval analysis argues that AI evaluation has crossed a cost threshold that changes who can participate. It reports that the Holistic Agent Leaderboard (HAL) spent about $40,000 to run 21,730 agent rollouts across 9 models and 9 benchmarks, and that a single GAIA run on a frontier model can cost $2,829 before caching. <a href="#references" rel="nofollow">[11]</a> The HAL paper itself reports 21,730 agent rollouts across 9 models and 9 benchmarks at a total cost of about $40,000. <a href="#references" rel="nofollow">[12]</a></p>
+<p>This matters because the high-effort regimes are often the regimes that matter most for safety. If independent evaluators cannot afford to test them, then the strongest evidence about frontier-system risk remains concentrated inside the organizations that build and deploy those systems.</p>
+<p>Because exhaustive high-budget evaluation is often unaffordable, evaluators should report not only what they directly measured, but also how risk appears to scale with budget, and where extrapolation begins.</p>
+<p>That distinction is crucial: a benchmark can measure <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>R</mi><mo stretchy="false">(</mo><msub><mi>B</mi><mtext>eval</mtext></msub><mo stretchy="false">)</mo></mrow></math>, estimate <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>R</mi><mo stretchy="false">(</mo><msub><mi>B</mi><mtext>adv</mtext></msub><mo stretchy="false">)</mo></mrow></math>, or speculate about the gap between them.</p>
+<h2>A minimal TTC-aware evaluation protocol</h2>
+<p>A minimal TTC-aware safety evaluation would do six things.</p>
+<ol>
+<li><p>Choose the relevant budget axes. Depending on the system, these may include samples, attack attempts, reasoning tokens, tool calls, retrieved documents, agent rollouts, wall-clock time, human-labor time, and monetary cost.</p>
+</li>
+<li><p>Evaluate multiple effort tiers. For example, a report might measure attack success at 1, 10, 100, 1,000, and 10,000 attempts, or at increasingly capable agent scaffolds.</p>
+</li>
+<li><p>Test multiple attacker types. Static prompts, adaptive LLM attackers, tool-using agents, and human-in-the-loop red teams apply very different optimization pressure.</p>
+</li>
+<li><p>Measure harmful success or attack success at each tier, rather than reporting only a single aggregate score.</p>
+</li>
+<li><p>Report some form of uncertainty. Agent evaluations are noisy, scaffold-sensitive, and often expensive enough that sample sizes are limited. Confidence intervals, variance estimates, and sensitivity analyses should become standard.</p>
+</li>
+<li><p>Separate observed results from projected results. A report should clearly distinguish measured risk from estimated risk. It should say, for example: “We directly measured up to <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>eval</mtext></msub></mrow></math>. We estimate the following behavior at <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>B</mi><mtext>adv</mtext></msub></mrow></math>, under the following assumptions: ...”</p>
+</li>
+</ol>
+<h2>What TTC-aware safety reports should include</h2>
+<p>The unit of evaluation should not be just “model X”, but rather the model together with the scaffold, deployment surface, attacker, and budget.</p>
+<div>
+	<table>
+		<thead><tr>
+<th>Component</th>
+<th>What to report</th>
+<th>Why it matters</th>
+</tr>
+
+		</thead><tbody><tr>
+<td>Model/version</td>
+<td>Model name, API snapshot, decoding settings</td>
+<td>Safety can change across versions and sampling policies</td>
+</tr>
+<tr>
+<td>Deployment surface</td>
+<td>Browser, shell, APIs, code execution, external data</td>
+<td>Tools change the action space</td>
+</tr>
+<tr>
+<td>Scaffold</td>
+<td>Agent loop, planner, retries, subagents</td>
+<td>Scaffolds can dominate outcomes</td>
+</tr>
+<tr>
+<td>Memory/retrieval</td>
+<td>Writable memory, RAG corpus, retrieval policy</td>
+<td>Stateful systems create delayed attack surfaces</td>
+</tr>
+<tr>
+<td>Attacker strategy</td>
+<td>Static prompts, LLM attacker, human red team, hybrid</td>
+<td>Different attackers apply different optimization pressure</td>
+</tr>
+<tr>
+<td>Budget axes</td>
+<td>Attempts, samples, tokens, tool calls, rollouts, cost</td>
+<td>“Effort” must be measurable</td>
+</tr>
+<tr>
+<td>Observed risk</td>
+<td>Harmful success at each measured tier</td>
+<td>One score hides scaling behavior</td>
+</tr>
+<tr>
+<td>Projected risk</td>
+<td>Estimates at plausible adversary budgets</td>
+<td>Release decisions need higher-budget risk estimates</td>
+</tr>
+<tr>
+<td>Uncertainty</td>
+<td>Variance, confidence intervals, sensitivity</td>
+<td>Agent results are noisy and scaffold-sensitive</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Monetary cost, model calls, judge calls, labor time</td>
+<td>Cost determines reproducibility</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>What was not tested</td>
+<td>Prevents overgeneralized safety claims</td>
+</tr>
+</tbody>
+	</table>
+</div>
+<p>This metadata defines the meaning of the safety claim.</p>
+<h2>Static safety checks are no longer enough</h2>
+<p>Static safety checks still matter: they are cheap, standardized, and useful for catching obvious regressions, and hence they should remain part of the safety stack.</p>
+<p>However, they are insufficient as standalone evidence for systems that can reason longer, search harder, use tools, maintain memory, or be attacked adaptively. In those settings, a static safety score is not a property of the model alone, but a property of the model under a particular inference budget, scaffold, attacker strategy, and deployment configuration.</p>
+<h2>What this implies for model releases</h2>
+<p>A model release should not be justified only by low-budget behavior, but by a scoped claim about risk under plausible adversarial effort.</p>
+<p>For low-risk deployments, cheap static checks may be adequate, but for systems with advanced capabilities, the release bar should be higher. </p>
+<h2>The bottom line</h2>
+<p>Safety evaluations should project test-time compute because real-world misuse is not static. As inference becomes adaptive, agentic, and search-based, the dangerous capability of a system increasingly depends on how much effort is spent at deployment time.</p>
+<p>The failure mode is not that current evaluations are always wrong, but that many of them are underspecified. They measure safety at one budget, under one scaffold, against one attacker, and then implicitly invite readers to generalize beyond the tested regime.</p>
+<p>A better standard would treat test-time compute as part of the threat model; it would produce risk surfaces that go beyond simple pass/fail scores. Most importantly, it would attach a budget label to every safety claim.</p>
+<p>"Safe under which scaffold? Against which attacker? Up to how much test-time compute?" That is the question safety evaluations increasingly need to answer.</p>
+<h2>Cite this article</h2>
+<pre><code>@misc{cerruti2026safety_eval_ttc,
+  author       = {Cerruti, Tommaso},
+  title        = {Safety Evals Should Project Test-Time Compute},
+  year         = {2026},
+  month        = may,
+  howpublished = {Hugging Face article},
+  url          = {https://huggingface.co/blog/Cerru02/safety-evals-should-project-ttc}
+}
+</code></pre>
+<h2 id="references">References</h2>
+<p>[1] Wang et al., “Self-Consistency Improves Chain of Thought Reasoning in Language Models.”<br><a href="https://arxiv.org/abs/2203.11171" rel="nofollow">https://arxiv.org/abs/2203.11171</a></p>
+<p>[2] Yao et al., “Tree of Thoughts: Deliberate Problem Solving with Large Language Models.”<br><a href="https://arxiv.org/abs/2305.10601" rel="nofollow">https://arxiv.org/abs/2305.10601</a></p>
+<p>[3] Snell et al., “Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters.”<br><a href="https://arxiv.org/abs/2408.03314" rel="nofollow">https://arxiv.org/abs/2408.03314</a></p>
+<p>[4] Hughes et al., “Best-of-N Jailbreaking.”<br><a href="https://arxiv.org/abs/2412.03556" rel="nofollow">https://arxiv.org/abs/2412.03556</a></p>
+<p>[5] Anil et al., “Many-shot Jailbreaking.”<br><a href="https://www.anthropic.com/research/many-shot-jailbreaking" rel="nofollow">https://www.anthropic.com/research/many-shot-jailbreaking</a></p>
+<p>[6] Fang et al., “LLM Agents can Autonomously Hack Websites.”<br><a href="https://arxiv.org/abs/2402.06664" rel="nofollow">https://arxiv.org/abs/2402.06664</a></p>
+<p>[7] Greshake et al., “Not what you’ve signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.”<br><a href="https://arxiv.org/abs/2302.12173" rel="nofollow">https://arxiv.org/abs/2302.12173</a></p>
+<p>[8] Chen et al., “AgentPoison: Red-teaming LLM Agents via Poisoning Memory or Knowledge Bases.”<br><a href="https://arxiv.org/abs/2407.12784" rel="nofollow">https://arxiv.org/abs/2407.12784</a></p>
+<p>[9] FBI Internet Crime Complaint Center, “2025 IC3 Annual Report.”<br><a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf" rel="nofollow">https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf</a></p>
+<p>[10] Chainalysis, “$2.2 Billion Stolen from Crypto Platforms in 2024, but Hacked Volumes Stagnate Toward Year-End as DPRK Slows Activity Post-July.”<br><a href="https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2025/" rel="nofollow">https://www.chainalysis.com/blog/crypto-hacking-stolen-funds-2025/</a></p>
+<p>[11] EvalEval Coalition, “AI evals are becoming the new compute bottleneck.”<br><a href="https://huggingface.co/blog/evaleval/eval-costs-bottleneck">https://huggingface.co/blog/evaleval/eval-costs-bottleneck</a></p>
+<p>[12] Kapoor et al., “Holistic Agent Leaderboard: The Missing Infrastructure for AI Agent Evaluation.”<br><a href="https://arxiv.org/abs/2510.11977" rel="nofollow">https://arxiv.org/abs/2510.11977</a></p>
+
+</body>
+</html>
