@@ -21,7 +21,7 @@ test('publication exposes consistent Scholar metadata and crawlable PDF links', 
   assert.ok(html.includes(`href="https://tommasocerruti.github.io/publications/${slug}/${slug}.pdf"`));
   const home = readFileSync(resolve(root, 'index.html'), 'utf8');
   assert.ok(home.includes(`href="/publications/${slug}/"`));
-  assert.ok(home.includes(`href="/papers/${slug}.pdf"`));
+  assert.ok(home.includes(`href="/publications/${slug}/${slug}.pdf"`));
   assert.ok(!home.includes('Safety Evals and TTC'));
   const pdf = readFileSync(resolve(root, `papers/${slug}.pdf`));
   assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
