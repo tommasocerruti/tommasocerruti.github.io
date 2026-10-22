@@ -5,7 +5,6 @@
 
   const boat = svg.querySelector('[data-finale-boat]');
   const boatLink = svg.querySelector('.finale-boat-link');
-  const boatDestination = boatLink?.getAttribute('href');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = value => Math.max(0, Math.min(1, value));
   let strokes;
@@ -15,14 +14,13 @@
   let boatAvailable;
 
   function setBoatAvailable(available) {
-    if (!boatLink || !boatDestination || available === boatAvailable) return;
+    if (!boatLink || available === boatAvailable) return;
     boatAvailable = available;
     boatLink.setAttribute('tabindex', available ? '0' : '-1');
+    boatLink.setAttribute('aria-disabled', String(!available));
     if (available) {
-      boatLink.setAttribute('href', boatDestination);
       boatLink.removeAttribute('aria-hidden');
     } else {
-      boatLink.removeAttribute('href');
       if (document.activeElement === boatLink) boatLink.blur();
       boatLink.setAttribute('aria-hidden', 'true');
     }
@@ -69,7 +67,7 @@
 
   function draw() {
     frame = 0;
-    if (motion.matches || !strokes?.length) return;
+    if (document.body.classList.contains('has-capsized') || motion.matches || !strokes?.length) return;
     const viewport = window.innerHeight;
     const rect = section.getBoundingClientRect();
     const sectionTop = window.scrollY + rect.top;
@@ -85,10 +83,11 @@
   }
 
   function schedule() {
-    if (!frame && !motion.matches) frame = requestAnimationFrame(draw);
+    if (!document.body.classList.contains('has-capsized') && !frame && !motion.matches) frame = requestAnimationFrame(draw);
   }
 
   function applyMotionPreference() {
+    if (document.body.classList.contains('has-capsized')) return;
     if (frame) cancelAnimationFrame(frame);
     frame = 0;
     lastProgress = -1;

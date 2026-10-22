@@ -166,57 +166,210 @@ test('a half-drawn stroke is visibly half drawn when the SVG is scaled down', as
   await page.close();
 });
 
-test('the boat becomes a keyboard-accessible surprise only after the drawing completes', async () => {
+// A disabled trigger must not capsize an unfinished drawing; activation must
+// stay in this document, remain broken after Escape, and reset only on reload.
+test('the boat only capsizes a completed drawing, supports the keyboard, and resets on refresh', async () => {
   const page = await browser.newPage();
-  // Verify navigation without loading the external video or playing audio.
-  await page.context().route('https://www.youtube.com/**', route => route.fulfill({ body: '<title>Video destination</title>' }));
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto(origin);
-  const link = page.locator('.finale-boat-link');
-  assert.equal(await link.count(), 1, 'Boat has a surprise link');
-  assert.equal(await link.getAttribute('href'), null);
-  assert.equal(await link.getAttribute('tabindex'), '-1');
+  const boat = page.locator('.finale-boat-link');
+  assert.equal(await boat.getAttribute('role'), 'button');
+  assert.equal(await boat.getAttribute('aria-disabled'), 'true');
+  assert.equal(await boat.getAttribute('tabindex'), '-1');
+  await boat.dispatchEvent('click');
+  assert.equal(await page.locator('.gravity-scene').count(), 0);
   await page.evaluate(() => scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
   await settle(page);
-  const accessibleLink = page.getByRole('link', { name: 'Sailboat (opens in a new tab)' });
-  assert.equal(await accessibleLink.count(), 1);
-  await link.focus();
-  const popupPromise = page.waitForEvent('popup');
-  await page.keyboard.press('Enter');
-  const popup = await popupPromise;
-  await popup.waitForLoadState();
-  assert.equal(popup.url(), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-  await popup.close();
-  await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
-  await settle(page);
-  assert.equal(await link.getAttribute('href'), null, 'Scrolling back disables the invisible link');
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForFunction(() => document.querySelector('.finale-boat-link').hasAttribute('href'));
-  assert.equal(await link.getAttribute('tabindex'), '0');
+  assert.equal(await boat.getAttribute('aria-disabled'), 'false');
+  await boat.focus();
+  await page.keyboard.press('Space');
+  await page.locator('.gravity-scene').waitFor();
+  assert.equal(page.context().pages().length, 1, 'No external navigation');
+  assert.equal(await page.locator('main').evaluate(el => el.inert), true);
+  assert.equal(await page.locator('.gravity-scene button, .gravity-scene a').count(), 0, 'No reset control');
+  await page.keyboard.press('Escape');
+  await boat.dispatchEvent('click');
+  assert.equal(await page.locator('.gravity-scene').count(), 1, 'Escape and repeat activation cannot restore or duplicate the scene');
+  await page.reload();
+  assert.equal(await page.locator('.gravity-scene').count(), 0);
+  assert.equal(await page.locator('main').evaluate(el => el.inert), false);
+  assert.deepEqual(errors, []);
   await page.close();
 });
 
-test('the boat can be tapped on mobile and linked without JavaScript', async () => {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, javaScriptEnabled: false });
-  await page.context().route('https://www.youtube.com/**', route => route.fulfill({ body: '<title>Video destination</title>' }));
+async function capsize(page) {
   await page.goto(origin);
-  const link = page.getByRole('link', { name: 'Sailboat (opens in a new tab)' });
-  assert.equal(await link.count(), 1);
-  await link.scrollIntoViewIfNeeded();
-  const hit = await page.locator('.finale-boat-hit-area').evaluate(area => {
-    const box = area.getBoundingClientRect();
-    const x = box.x + box.width / 2;
-    const y = box.y + box.height / 2;
-    const isBoatLink = (x, y) => Boolean(document.elementFromPoint(x, y)?.closest('.finale-boat-link'));
-    return { boat: isBoatLink(x, y), water: isBoatLink(x - 20, y) };
+  await page.evaluate(() => scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+  await settle(page);
+  await page.locator('.finale-boat-link').click();
+  await page.locator('.gravity-scene').waitFor();
+}
+
+// Removing the physics update or the artwork capture must stop this passing.
+test('capsizing turns the real text and illustration into moving debris', async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await capsize(page);
+  assert.ok(await page.locator('.gravity-word').count() > 50, 'Real page words become individual bodies');
+  assert.ok(await page.locator('.gravity-shard').count() > 10, 'The illustration shatters too');
+  assert.ok((await page.locator('.gravity-word').allTextContents()).join(' ').includes('research'));
+  assert.equal(await page.locator('.gravity-boat').count(), 0);
+  assert.equal(await page.locator('.gravity-note').count(), 0);
+  const shard = page.locator('.gravity-shard').first();
+  const before = await shard.getAttribute('style');
+  await page.waitForTimeout(1100);
+  assert.notEqual(await shard.getAttribute('style'), before, 'Debris actually moves');
+  await page.waitForTimeout(3500);
+  const pile = await page.locator('.gravity-piece').evaluateAll(els => els.filter(el => {
+    const r = el.getBoundingClientRect();
+    return r.top >= innerHeight / 2 && r.bottom <= innerHeight + 15;
+  }).length);
+  assert.ok(pile > 20, 'Debris lands inside the viewport');
+  await page.close();
+});
+
+async function grabbablePoint(page) {
+  return page.locator('.gravity-piece').evaluateAll(els => {
+    for (const el of els.toReversed()) {
+      const r = el.getBoundingClientRect();
+      const x = r.x + r.width / 2, y = r.y + r.height / 2;
+      if (x > 15 && x < innerWidth - 15 && y > 100 && y < innerHeight - 15 && document.elementFromPoint(x, y) === el) {
+        el.dataset.grabTest = 'true';
+        return { x, y };
+      }
+    }
   });
-  assert.equal(hit.boat, true, 'Boat itself can be tapped');
-  assert.equal(hit.water, false, 'Nearby water is not clickable');
-  assert.equal(await link.locator('title').count(), 0, 'No spoiler tooltip');
-  const popupPromise = page.waitForEvent('popup');
-  await link.tap();
-  const popup = await popupPromise;
-  await popup.waitForLoadState();
-  assert.equal(popup.url(), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-  await popup.close();
+}
+
+// Catch a disconnected pointer constraint, or navigation when grabbing text.
+test('wreckage can be picked up and thrown with the mouse', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  await capsize(page);
+  await page.waitForTimeout(4500);
+  const point = await grabbablePoint(page);
+  assert.ok(point, 'A landed piece is reachable');
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.down();
+  await page.mouse.move(600, 240, { steps: 25 });
+  await page.waitForTimeout(350);
+  const held = await page.locator('[data-grab-test]').boundingBox();
+  assert.ok(Math.abs(held.x + held.width / 2 - 600) < 100, 'Grabbed piece follows the mouse horizontally');
+  assert.ok(Math.abs(held.y + held.height / 2 - 240) < 100, 'Grabbed piece lifts out of the pile');
+  await page.mouse.up();
+  await page.waitForTimeout(800);
+  const released = await page.locator('[data-grab-test]').boundingBox();
+  assert.ok(released.y > held.y + 40, 'Released debris falls again');
+  assert.equal(page.url(), origin + '/');
+  await page.close();
+});
+
+// No motion preference may accidentally start a rapid collapse or an idle loop.
+test('reduced motion gets static wreckage that can still be moved without a restore control', async () => {
+  const page = await browser.newPage({ reducedMotion: 'reduce' });
+  await capsize(page);
+  const debris = page.locator('.gravity-piece').first();
+  const initial = await debris.getAttribute('style');
+  await page.waitForTimeout(400);
+  assert.equal(await debris.getAttribute('style'), initial);
+  assert.equal(await page.locator('.gravity-scene').evaluate(el => el.getAnimations({ subtree: true }).length), 0);
+  const point = await grabbablePoint(page);
+  assert.ok(point);
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.down();
+  await page.mouse.move(300, 200, { steps: 10 });
+  await page.mouse.up();
+  const moved = await page.locator('[data-grab-test]').boundingBox();
+  assert.ok(moved.y < 260, 'Static debris still follows a deliberate drag');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForTimeout(300);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await settle(page);
+  const frozen = await debris.getAttribute('style');
+  await page.waitForTimeout(300);
+  assert.equal(await debris.getAttribute('style'), frozen, 'Changing the preference freezes the current wreckage');
+  assert.equal(await page.locator('.gravity-scene').count(), 1);
+  await page.close();
+});
+
+test('grabbing the rendered edge picks up the piece under the pointer', async () => {
+  const page = await browser.newPage({ reducedMotion: 'reduce' });
+  await capsize(page);
+  const point = await page.locator('.gravity-word').evaluateAll(els => {
+    for (const el of els.toReversed()) {
+      const rect = el.getBoundingClientRect();
+      const matrix = new DOMMatrix(getComputedStyle(el).transform);
+      const inset = -el.offsetHeight * 0.46;
+      const x = rect.x + rect.width / 2 - matrix.b * inset;
+      const y = rect.y + rect.height / 2 + matrix.a * inset;
+      if (x > 10 && x < innerWidth - 10 && y > 100 && y < innerHeight - 10 && document.elementFromPoint(x, y) === el) {
+        el.dataset.edgeTest = 'true';
+        return { x, y };
+      }
+    }
+  });
+  assert.ok(point, 'A rendered word edge is reachable');
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.down();
+  assert.equal(await page.locator('[data-edge-test]').evaluate(el => el.classList.contains('is-held')), true);
+  await page.mouse.up();
+  await page.close();
+});
+
+test('shrinking a settled desktop pile keeps debris above the new floor', async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await page.addInitScript(() => {
+    let seed = 1;
+    Math.random = () => ((seed = (Math.imul(1664525, seed) + 1013904223) >>> 0) / 4294967296);
+  });
+  await page.clock.install();
+  await capsize(page);
+  await page.clock.runFor(18000);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.clock.runFor(18000);
+  const lost = await page.locator('.gravity-piece').evaluateAll(els => els.filter(el => el.getBoundingClientRect().top > innerHeight).length);
+  assert.equal(lost, 0, 'No piece tunnels through the resized floor');
+  await page.close();
+});
+
+// Real touch input must drag debris instead of scrolling; rotating the device
+// must keep the floor and scene within the new viewport.
+test('the boat and wreckage work with touch and survive a viewport rotation', async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(origin);
+  await page.evaluate(() => scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+  await settle(page);
+  await page.locator('.finale-boat-link').tap();
+  await page.locator('.gravity-scene').waitFor();
+  await page.waitForTimeout(4500);
+  const cdp = await page.context().newCDPSession(page);
+  const point = await grabbablePoint(page);
+  assert.ok(point);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: point.x, y: point.y }] });
+  for (let i = 1; i <= 16; i++) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: point.x + (195 - point.x) * i / 16, y: point.y + (200 - point.y) * i / 16 }] });
+  }
+  await page.waitForTimeout(350);
+  const held = await page.locator('[data-grab-test]').boundingBox();
+  assert.ok(held.y < 300, 'A touch drag lifts the wreckage');
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.setViewportSize({ width: 844, height: 390 });
+  await settle(page);
+  const scene = await page.locator('.gravity-scene').boundingBox();
+  assert.equal(scene.width, 844);
+  assert.equal(scene.height, 390);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('without JavaScript the artwork remains readable and the boat does not navigate away', async () => {
+  const page = await browser.newPage({ javaScriptEnabled: false });
+  await page.goto(origin);
+  const boat = page.locator('.finale-boat-link');
+  assert.equal(await boat.getAttribute('href'), null);
+  assert.equal(await boat.getAttribute('aria-disabled'), 'true');
+  assert.equal((await drawing(page)).complete, (await drawing(page)).count);
   await page.close();
 });
